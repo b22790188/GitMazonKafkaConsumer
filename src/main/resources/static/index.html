@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Kafka Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        #status {
+            color: green;
+            font-weight: bold;
+        }
+
+        #messages {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>WebSocket Kafka Consumer Test</h1>
+
+<p>WebSocket Status: <span id="status">Disconnected</span></p>
+
+<div id="messages">
+    <h3>Waiting for messages...</h3>
+</div>
+
+<script>
+    var socket;
+    var statusElement = document.getElementById("status");
+    var messagesElement = document.getElementById("messages");
+
+    // 建立 WebSocket 連線
+    function connect() {
+        socket = new WebSocket("ws://localhost:8080/monitor");
+
+        // 當 WebSocket 連線成功
+        socket.onopen = function () {
+            statusElement.textContent = "Connected";
+            statusElement.style.color = "green";
+        };
+
+        // 當 WebSocket 接收到訊息
+        socket.onmessage = function (event) {
+            var message = event.data;
+            messagesElement.textContent = message;  // 覆蓋前面的訊息
+        };
+
+        // 當 WebSocket 連線關閉
+        socket.onclose = function () {
+            statusElement.textContent = "Disconnected";
+            statusElement.style.color = "red";
+            setTimeout(connect, 3000); // 3秒後嘗試重連
+        };
+
+        // 當 WebSocket 發生錯誤
+        socket.onerror = function (error) {
+            console.log("WebSocket error: " + error);
+        };
+    }
+
+    // 初始化 WebSocket 連線
+    connect();
+</script>
+
+</body>
+</html>
