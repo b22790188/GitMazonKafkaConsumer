@@ -11,9 +11,9 @@ public class WebSocketService {
         this.webSocketHandler = webSocketHandler;
     }
 
-    public void sendMessageToAllConnectedClients(String message) {
+    public void sendMessageToUser(String username, String message) {
         try {
-            webSocketHandler.broadcastMessage(message);
+            webSocketHandler.sendMessageToUser(username, message);
         } catch (Exception e) {
             e.printStackTrace();
         }

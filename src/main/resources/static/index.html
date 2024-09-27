@@ -22,12 +22,14 @@
             padding: 10px;
             border: 1px solid #ccc;
             background-color: #fff;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        #messages div {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
         }
     </style>
 </head>
@@ -38,7 +40,7 @@
 <p>WebSocket Status: <span id="status">Disconnected</span></p>
 
 <div id="messages">
-    <h3>Waiting for messages...</h3>
+    <h3>Messages:</h3>
 </div>
 
 <script>
@@ -46,36 +48,63 @@
     var statusElement = document.getElementById("status");
     var messagesElement = document.getElementById("messages");
 
-    // 建立 WebSocket 連線
-    function connect() {
-        socket = new WebSocket("ws://localhost:8080/monitor");
+    // Object to store container stats
+    var containerStats = {};
 
-        // 當 WebSocket 連線成功
+    // Establish WebSocket connection
+    function connect() {
+        //todo: remove username
+        socket = new WebSocket("ws://localhost:8080/monitor?username=gitmazon");
+
+        // When WebSocket connection is established
         socket.onopen = function () {
             statusElement.textContent = "Connected";
             statusElement.style.color = "green";
         };
 
-        // 當 WebSocket 接收到訊息
+        // When WebSocket receives a message
         socket.onmessage = function (event) {
             var message = event.data;
-            messagesElement.textContent = message;  // 覆蓋前面的訊息
+
+            // Assuming message format: containerName: CPU X%, RAM Y
+            var parts = message.split(": ");
+            var containerName = parts[0];
+            var stats = parts[1];
+
+            // Update stats for the corresponding container
+            containerStats[containerName] = stats;
+
+            // Re-render the display
+            renderMessages();
         };
 
-        // 當 WebSocket 連線關閉
+        // When WebSocket connection is closed
         socket.onclose = function () {
             statusElement.textContent = "Disconnected";
             statusElement.style.color = "red";
-            setTimeout(connect, 3000); // 3秒後嘗試重連
+            setTimeout(connect, 3000); // Try reconnecting after 3 seconds
         };
 
-        // 當 WebSocket 發生錯誤
+        // When WebSocket encounters an error
         socket.onerror = function (error) {
             console.log("WebSocket error: " + error);
         };
     }
 
-    // 初始化 WebSocket 連線
+    // Render the stats for all containers
+    function renderMessages() {
+        // Clear existing messages
+        messagesElement.innerHTML = '<h3>Messages:</h3>';
+
+        // Iterate and display stats for each container
+        for (var container in containerStats) {
+            var messageElement = document.createElement("div");
+            messageElement.textContent = container + ": " + containerStats[container];
+            messagesElement.appendChild(messageElement);
+        }
+    }
+
+    // Initialize WebSocket connection
     connect();
 </script>
 

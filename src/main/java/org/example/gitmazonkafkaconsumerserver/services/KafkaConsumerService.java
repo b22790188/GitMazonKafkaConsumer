@@ -18,6 +18,11 @@ public class KafkaConsumerService {
     public void listen(String message) {
         log.info(message);
 
-        webSocketService.sendMessageToAllConnectedClients(message);
+        String[] parts = message.split(":");
+        String containerName = parts[0];
+
+        String username = containerName.split("_")[0];
+
+        webSocketService.sendMessageToUser(username, message);
     }
 }
