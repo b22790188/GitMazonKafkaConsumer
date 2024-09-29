@@ -1,27 +1,30 @@
 package org.example.gitmazonkafkaconsumerserver;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Log4j2
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
-    private static final Logger log = LogManager.getLogger(WebSocketHandler.class);
-
-//    private Set<WebSocketSession> sessions = Collections.synchronizedSet(new HashSet<>());
 
     private Map<String, WebSocketSession> userSessions = new ConcurrentHashMap<>();
+    private Set<WebSocketSession> adminSessions = ConcurrentHashMap.newKeySet();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         String username = session.getUri().getQuery().split("=")[1];
-        userSessions.put(username, session);
+        if ("admin".equals(username)) {
+            adminSessions.add(session);
+        } else {
+            userSessions.put(username, session);
+        }
 
 //        sessions.add(session);
     }
@@ -36,6 +39,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
         WebSocketSession session = userSessions.get(username);
         if (session != null && session.isOpen()) {
             session.sendMessage(new TextMessage(message));
+        }
+    }
+
+    public void sendMessageToAdmins(String message) throws Exception {
+        for (WebSocketSession session : adminSessions) {
+            if (session.isOpen()) {
+                session.sendMessage(new TextMessage(message));
+            }
         }
     }
 }

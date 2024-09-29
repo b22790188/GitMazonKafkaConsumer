@@ -18,4 +18,12 @@ public class WebSocketService {
             e.printStackTrace();
         }
     }
+
+    public void sendMessageToAdmin(String message) {
+        try {
+            webSocketHandler.sendMessageToAdmins(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

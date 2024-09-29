@@ -24,5 +24,6 @@ public class KafkaConsumerService {
         String username = containerName.split("_")[0];
 
         webSocketService.sendMessageToUser(username, message);
+        webSocketService.sendMessageToAdmin(message);
     }
 }

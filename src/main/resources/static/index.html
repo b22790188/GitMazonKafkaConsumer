@@ -44,16 +44,16 @@
 </div>
 
 <script>
-    var socket;
-    var statusElement = document.getElementById("status");
-    var messagesElement = document.getElementById("messages");
+    let socket;
+    let statusElement = document.getElementById("status");
+    let messagesElement = document.getElementById("messages");
 
     // Object to store container stats
-    var containerStats = {};
+    let containerStats = {};
 
     // Establish WebSocket connection
     function connect() {
-        //todo: remove username
+        //todo: get username by page
         socket = new WebSocket("ws://localhost:8080/monitor?username=gitmazon");
 
         // When WebSocket connection is established
@@ -64,12 +64,12 @@
 
         // When WebSocket receives a message
         socket.onmessage = function (event) {
-            var message = event.data;
+            let message = event.data;
 
             // Assuming message format: containerName: CPU X%, RAM Y
-            var parts = message.split(": ");
-            var containerName = parts[0];
-            var stats = parts[1];
+            let parts = message.split(": ");
+            let containerName = parts[0];
+            let stats = parts[1];
 
             // Update stats for the corresponding container
             containerStats[containerName] = stats;
@@ -97,8 +97,8 @@
         messagesElement.innerHTML = '<h3>Messages:</h3>';
 
         // Iterate and display stats for each container
-        for (var container in containerStats) {
-            var messageElement = document.createElement("div");
+        for (let container in containerStats) {
+            let messageElement = document.createElement("div");
             messageElement.textContent = container + ": " + containerStats[container];
             messagesElement.appendChild(messageElement);
         }
